@@ -1,24 +1,22 @@
 module HairTrigger
   module Migrator
-    def proper_table_name_with_hash_awareness(*args)
-      name = args.first
-      return name if name.is_a?(Hash)
-      proper_table_name_without_hash_awareness(*args)
+    module ProperTableNameExt
+      def proper_table_name(*args)
+        name = args.first
+        return name if name.is_a?(Hash)
+        super(*args)
+      end
     end
 
-    class << self
-      def extended(base)
-        base.class_eval do
-          class << self
-            alias_method_chain :proper_table_name, :hash_awareness
-          end
-        end
+    def self.extended(base)
+      base.class_eval do
+        prepend ProperTableNameExt
       end
+    end
 
-      def included(base)
-        base.instance_eval do
-          alias_method_chain :proper_table_name, :hash_awareness
-        end
+    def self.included(base)
+      base.instance_eval do
+        prepend ProperTableNameExt
       end
     end
   end
